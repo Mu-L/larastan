@@ -349,6 +349,11 @@ services:
             - phpstan.broker.dynamicFunctionReturnTypeExtension
 
     -
+        class: NunoMaduro\Larastan\ReturnTypes\Helpers\StrExtension
+        tags:
+            - phpstan.broker.dynamicFunctionReturnTypeExtension
+
+    -
         class: NunoMaduro\Larastan\ReturnTypes\Helpers\TapExtension
         tags:
             - phpstan.broker.dynamicFunctionReturnTypeExtension
@@ -413,6 +418,7 @@ services:
             databaseMigrationPath: %databaseMigrationsPath%
             disableMigrationScan: %disableMigrationScan%
             parser: @currentPhpVersionSimpleDirectParser
+            reflectionProvider: @reflectionProvider
 
     -
         class: NunoMaduro\Larastan\Properties\SquashedMigrationHelper

@@ -7,7 +7,12 @@ namespace NunoMaduro\Larastan\Properties;
 use Illuminate\Support\Str;
 use PhpParser;
 use PhpParser\NodeFinder;
+use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Type\ObjectType;
+
+use function count;
+use function is_string;
+use function strtolower;
 
 /**
  * @see https://github.com/psalm/laravel-psalm-plugin/blob/master/src/SchemaAggregator.php
@@ -17,10 +22,14 @@ final class SchemaAggregator
     /** @var array<string, SchemaTable> */
     public array $tables = [];
 
-    /** @param array<string, SchemaTable> $tables */
-    public function __construct(array $tables = [])
+    /** @var ReflectionProvider */
+    private $reflectionProvider;
+
+    /** @param  array<string, SchemaTable>  $tables */
+    public function __construct(ReflectionProvider $reflectionProvider, array $tables = [])
     {
         $this->tables = $tables;
+        $this->reflectionProvider = $reflectionProvider;
     }
 
     /**
@@ -137,13 +146,11 @@ final class SchemaAggregator
         ) {
             $argName = $call->getArgs()[1]->value->params[0]->var->name;
 
-            $this->processColumnUpdates($tableName, $argName, $updateClosure->stmts);
+            $this->processColumnUpdates($tableName, $argName, $this->getUpdateStatements($updateClosure));
         }
     }
 
     /**
-     * @param  string  $tableName
-     * @param  string  $argName
      * @param  PhpParser\Node\Stmt[]  $stmts
      *
      * @throws \Exception
@@ -170,6 +177,7 @@ final class SchemaAggregator
                 while ($rootVar instanceof PhpParser\Node\Expr\MethodCall) {
                     if ($rootVar->name instanceof PhpParser\Node\Identifier
                         && $rootVar->name->name === 'nullable'
+                        && $this->getNullableArgumentValue($rootVar) === true
                     ) {
                         $nullable = true;
                     }
@@ -201,12 +209,21 @@ final class SchemaAggregator
                             $columnName = $secondArg->value;
                         }
 
-                        $table->setColumn(new SchemaColumn($columnName, 'int', $nullable));
+                        $type = $this->getModelReferenceType($modelClass);
+                        $table->setColumn(new SchemaColumn($columnName, $type ?? 'int', $nullable));
 
                         continue;
                     }
 
                     if (! $firstArg instanceof PhpParser\Node\Scalar\String_) {
+                        if ($firstArg instanceof PhpParser\Node\Expr\Array_ && $firstMethodCall->name->name === 'dropColumn') {
+                            foreach ($firstArg->items as $array_item) {
+                                if ($array_item !== null && $array_item->value instanceof PhpParser\Node\Scalar\String_) {
+                                    $table->dropColumn($array_item->value->value);
+                                }
+                            }
+                        }
+
                         if ($firstMethodCall->name->name === 'timestamps'
                             || $firstMethodCall->name->name === 'timestampsTz'
                             || $firstMethodCall->name->name === 'nullableTimestamps'
@@ -481,5 +498,80 @@ final class SchemaAggregator
         $table->name = $newTableName;
 
         $this->tables[$newTableName] = $table;
+    }
+
+    private function getModelReferenceType(string $modelClass): ?string
+    {
+        $classReflection = $this->reflectionProvider->getClass($modelClass);
+        try {
+            /** @var \Illuminate\Database\Eloquent\Model $modelInstance */
+            $modelInstance = $classReflection->getNativeReflection()->newInstanceWithoutConstructor();
+        } catch (\ReflectionException $e) {
+            return null;
+        }
+
+        $tableName = $modelInstance->getTable();
+
+        if (! array_key_exists($tableName, $this->tables)) {
+            return null;
+        }
+
+        $table = $this->tables[$tableName];
+        $column = $modelInstance->getKeyName();
+
+        if (! array_key_exists($column, $table->columns)) {
+            return null;
+        }
+
+        return $table->columns[$column]->readableType;
+    }
+
+    private function getNullableArgumentValue(PhpParser\Node\Expr\MethodCall $rootVar): bool
+    {
+        if (! array_key_exists(0, $rootVar->args)) {
+            return true;
+        }
+
+        $arg = $rootVar->args[0];
+
+        if (! ($arg instanceof PhpParser\Node\Arg)) {
+            return true;
+        }
+
+        $argExpression = $arg->value;
+
+        if (! ($argExpression instanceof PhpParser\Node\Expr\ConstFetch)) {
+            return true;
+        }
+
+        return $argExpression->name->getFirst() === 'true';
+    }
+
+    /**
+     * @return PhpParser\Node\Stmt\Expression[]
+     */
+    private function getUpdateStatements(PhpParser\Node\Expr $updateClosure): array
+    {
+        if (! property_exists($updateClosure, 'stmts')) {
+            return [];
+        }
+
+        $statements = [];
+        $nodeFinder = new NodeFinder();
+
+        foreach ($updateClosure->stmts as $updateStatement) {
+            if ($updateStatement instanceof PhpParser\Node\Stmt\If_) {
+                $statements = array_merge(
+                    $statements,
+                    $nodeFinder->findInstanceOf($updateStatement, PhpParser\Node\Stmt\Expression::class)
+                );
+
+                continue;
+            }
+
+            $statements[] = $updateStatement;
+        }
+
+        return $statements;
     }
 }

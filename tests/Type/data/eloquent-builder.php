@@ -6,6 +6,7 @@ namespace EloquentBuilder;
 
 use App\Post;
 use App\PostBuilder;
+use App\Team;
 use App\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -200,7 +201,7 @@ function testCallingQueryBuilderMethodOnEloquentBuilderReturnsEloquentBuilder(Bu
     assertType('Illuminate\Database\Eloquent\Builder<App\User>', $builder->whereNotNull('test'));
 }
 
-/** @param OnlyUsers&User $userAndAuth */
+/** @param  OnlyUsers&User  $userAndAuth */
 function doFoo(User $user, Post $post, $userAndAuth): void
 {
     assertType('Illuminate\Database\Eloquent\Builder<App\User>', $user->newQuery());
@@ -223,6 +224,7 @@ function doFoo(User $user, Post $post, $userAndAuth): void
     assertType('Illuminate\Database\Eloquent\Builder<App\User>', $userAndAuth->newQueryWithoutScopes());
     assertType('Illuminate\Database\Eloquent\Builder<App\User>', $userAndAuth->newQueryWithoutScope('foo'));
     assertType('Illuminate\Database\Eloquent\Builder<App\User>', $userAndAuth->newQueryForRestoration([1]));
+    assertType('Illuminate\Database\Eloquent\Builder<App\User>', $userAndAuth::query());
 
     assertType('Illuminate\Support\LazyCollection<int, App\User>', User::query()->lazy());
     assertType('Illuminate\Support\LazyCollection<int, App\User>', User::query()->lazyById());
@@ -340,15 +342,15 @@ function testDecrementWithQueryExpression()
     assertType('int', User::query()->decrement(\Illuminate\Support\Facades\DB::raw('counter')));
 }
 
-/** @param EloquentBuilder<User> $query */
+/** @param  EloquentBuilder<User>  $query */
 function testMacro(EloquentBuilder $query): void
 {
     assertType('Illuminate\Database\Eloquent\Builder<App\User>', $query->macro('customMacro', function () {
     }));
 }
 
-/** @param EloquentBuilder<User> $query */
-function testGlobalMacro(\Illuminate\Database\Eloquent\Builder $query)
+/** @param  EloquentBuilder<User>  $query */
+function testGlobalMacro(EloquentBuilder $query)
 {
     assertType('string', $query->globalCustomMacro('foo'));
 }
@@ -450,6 +452,13 @@ function testChunkOnEloquentBuilder()
     User::chunk(1000, fn ($collection) => assertType('Illuminate\Database\Eloquent\Collection<int, App\User>', $collection));
 }
 
+/** @param  Builder<User|Team>  $builder */
+function testUnionBuilder(Builder $builder)
+{
+    assertType('App\Team|App\User', $builder->findOrFail(4));
+    assertType('Illuminate\Database\Eloquent\Builder<App\Team|App\User>', $builder->where('id', 5));
+}
+
 class Foo extends Model
 {
     /** @phpstan-use FooTrait<Foo> */
@@ -490,4 +499,44 @@ class TestModel extends Model
 /** @extends Builder<Model> */
 class CustomBuilder extends Builder
 {
+}
+
+/**
+ * @template TModel of User|Team
+ */
+abstract class UnionClass
+{
+    /**
+     * @return TModel
+     */
+    public function test(int $id): Model
+    {
+        assertType('TModel of App\Team|App\User (class EloquentBuilder\UnionClass, argument)', $this->getQuery()->findOrFail($id));
+
+        return $this->getQuery()->findOrFail($id);
+    }
+
+    /**
+     * @return Builder<TModel>
+     */
+    abstract public function getQuery(): Builder;
+}
+
+/**
+ * @extends UnionClass<Team>
+ */
+class TeamClass extends UnionClass
+{
+    public function foo()
+    {
+        assertType('App\Team', $this->test(5));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getQuery(): Builder
+    {
+        return Team::query();
+    }
 }

@@ -22,6 +22,14 @@ use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 use PHPStan\Type\VerbosityLevel;
 
+use function array_key_exists;
+use function array_shift;
+use function count;
+use function in_array;
+use function preg_split;
+use function substr;
+use function ucfirst;
+
 class BuilderHelper
 {
     /** @var string[] */
@@ -119,9 +127,6 @@ class BuilderHelper
      * that should be checked by caller before calling this method.
      *
      * @param  ClassReflection  $eloquentBuilder  Can be `EloquentBuilder` or a custom builder extending it.
-     * @param  string  $methodName
-     * @param  ClassReflection  $model
-     * @return MethodReflection|null
      *
      * @throws MissingMethodFromReflectionException
      * @throws ShouldNotHappenException
@@ -188,9 +193,6 @@ class BuilderHelper
     }
 
     /**
-     * @param  string  $modelClassName
-     * @return string
-     *
      * @throws MissingMethodFromReflectionException
      * @throws ShouldNotHappenException
      */

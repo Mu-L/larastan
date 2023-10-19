@@ -12,6 +12,9 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Collectors\Collector;
 use PHPStan\Type\ObjectType;
 
+use function count;
+use function in_array;
+
 /** @implements Collector<Node\Expr\MethodCall, string> */
 final class UsedEmailViewCollector implements Collector
 {
@@ -20,7 +23,7 @@ final class UsedEmailViewCollector implements Collector
         return Node\Expr\MethodCall::class;
     }
 
-    /** @param Node\Expr\MethodCall $node */
+    /** @param  Node\Expr\MethodCall  $node */
     public function processNode(Node $node, Scope $scope): ?string
     {
         $name = $node->name;

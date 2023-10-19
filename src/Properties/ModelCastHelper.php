@@ -23,6 +23,9 @@ use PHPStan\Type\StringType;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
 
+use function class_exists;
+use function explode;
+
 class ModelCastHelper
 {
     public function __construct(protected ReflectionProvider $reflectionProvider)
@@ -158,10 +161,6 @@ class ModelCastHelper
         return new ObjectType($dateClass);
     }
 
-    /**
-     * @param  string  $cast
-     * @return string
-     */
     private function parseCast(string $cast): string
     {
         foreach (explode(':', $cast) as $part) {

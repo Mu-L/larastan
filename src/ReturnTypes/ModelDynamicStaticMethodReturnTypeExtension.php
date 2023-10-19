@@ -16,6 +16,7 @@ use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Name;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\MethodReflection;
+use PHPStan\Reflection\MissingMethodFromReflectionException;
 use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Type\DynamicStaticMethodReturnTypeExtension;
@@ -23,6 +24,10 @@ use PHPStan\Type\Generic\GenericObjectType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
+
+use function array_intersect;
+use function count;
+use function in_array;
 
 /**
  * @internal
@@ -102,11 +107,15 @@ final class ModelDynamicStaticMethodReturnTypeExtension implements DynamicStatic
                 $types = [];
 
                 foreach ($classNames as $className) {
-                    if ($this->reflectionProvider->hasClass($className)) {
+                    if (! $this->reflectionProvider->hasClass($className)) {
+                        continue;
+                    }
+                    try {
                         $types[] = new GenericObjectType(
                             $this->builderHelper->determineBuilderName($className),
                             [new ObjectType($className)]
                         );
+                    } catch (MissingMethodFromReflectionException) {
                     }
                 }
 

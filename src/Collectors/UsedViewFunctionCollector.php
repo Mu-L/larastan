@@ -9,6 +9,8 @@ use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Collectors\Collector;
 
+use function count;
+
 /** @implements Collector<Node\Expr\FuncCall, string> */
 final class UsedViewFunctionCollector implements Collector
 {
@@ -17,7 +19,7 @@ final class UsedViewFunctionCollector implements Collector
         return Node\Expr\FuncCall::class;
     }
 
-    /** @param Node\Expr\FuncCall $node */
+    /** @param  Node\Expr\FuncCall  $node */
     public function processNode(Node $node, Scope $scope): ?string
     {
         $funcName = $node->name;

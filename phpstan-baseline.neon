@@ -31,14 +31,14 @@ parameters:
 			path: src/Properties/ModelAccessorExtension.php
 
 		-
-			message: "#^PHPDoc tag @var assumes the expression with type PHPStan\\\\Type\\\\Type\\|null is always PHPStan\\\\Type\\\\ObjectType but it's error\\-prone and dangerous\\.$#"
+			message: "#^Constant LARAVEL_VERSION not found\\.$#"
 			count: 1
-			path: src/ReturnTypes/BuilderModelFindExtension.php
+			path: src/ReturnTypes/CollectionGenericStaticMethodDynamicMethodReturnTypeExtension.php
 
 		-
 			message: "#^Constant LARAVEL_VERSION not found\\.$#"
 			count: 1
-			path: src/ReturnTypes/CollectionGenericStaticMethodDynamicMethodReturnTypeExtension.php
+			path: src/LarastanStubFilesExtension.php
 
 		-
 			message: "#^PHPDoc tag @var assumes the expression with type PHPStan\\\\Type\\\\Type\\|null is always PHPStan\\\\Type\\\\ObjectType but it's error\\-prone and dangerous\\.$#"

@@ -17,6 +17,13 @@ use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\BooleanType;
 
+use function array_shift;
+use function count;
+use function in_array;
+use function sprintf;
+use function str_replace;
+use function ucfirst;
+
 /** @implements Rule<StaticCall> */
 class CheckDispatchArgumentTypesCompatibleWithClassConstructorRule implements Rule
 {
@@ -29,9 +36,6 @@ class CheckDispatchArgumentTypesCompatibleWithClassConstructorRule implements Ru
     /** @var string */
     private $dispatchableClass;
 
-    /**
-     * @param  string  $dispatchableClass
-     */
     public function __construct(
         ReflectionProvider $reflectionProvider,
         FunctionCallParametersCheck $check,
@@ -43,7 +47,7 @@ class CheckDispatchArgumentTypesCompatibleWithClassConstructorRule implements Ru
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getNodeType(): string
     {
@@ -51,7 +55,7 @@ class CheckDispatchArgumentTypesCompatibleWithClassConstructorRule implements Ru
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function processNode(Node $node, Scope $scope): array
     {

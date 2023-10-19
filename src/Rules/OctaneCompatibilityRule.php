@@ -14,6 +14,10 @@ use PHPStan\Rules\RuleError;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\ObjectType;
 
+use function array_map;
+use function count;
+use function in_array;
+
 /**
  * @implements Rule<MethodCall>
  */
@@ -24,7 +28,7 @@ class OctaneCompatibilityRule implements Rule
         return MethodCall::class;
     }
 
-    /** @param MethodCall $node */
+    /** @param  MethodCall  $node */
     public function processNode(Node $node, Scope $scope): array
     {
         if (! $node->name instanceof Node\Identifier) {

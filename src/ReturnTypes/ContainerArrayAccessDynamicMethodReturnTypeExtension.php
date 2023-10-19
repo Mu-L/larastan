@@ -14,6 +14,10 @@ use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
 
+use function count;
+use function get_class;
+use function is_object;
+
 class ContainerArrayAccessDynamicMethodReturnTypeExtension implements DynamicMethodReturnTypeExtension
 {
     use HasContainer;
@@ -64,6 +68,7 @@ class ContainerArrayAccessDynamicMethodReturnTypeExtension implements DynamicMet
 
             if ($resolvedValue === null) {
                 $argTypes[] = new ErrorType();
+
                 continue;
             }
 
@@ -71,6 +76,7 @@ class ContainerArrayAccessDynamicMethodReturnTypeExtension implements DynamicMet
                 $class = get_class($resolvedValue);
 
                 $argTypes[] = new ObjectType($class);
+
                 continue;
             }
 

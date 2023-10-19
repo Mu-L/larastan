@@ -15,6 +15,13 @@ use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 
+use function array_map;
+use function array_merge;
+use function count;
+use function explode;
+use function in_array;
+use function sprintf;
+
 /** @implements Rule<Node\Expr\CallLike> */
 class RelationExistenceRule implements Rule
 {
@@ -23,7 +30,7 @@ class RelationExistenceRule implements Rule
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getNodeType(): string
     {
@@ -31,7 +38,7 @@ class RelationExistenceRule implements Rule
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function processNode(Node $node, Scope $scope): array
     {

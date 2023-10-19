@@ -13,6 +13,8 @@ use PHPStan\Rules\RuleLevelHelper;
 use PHPStan\Type\ErrorType;
 use PHPStan\Type\Type;
 
+use function count;
+
 /**
  * @implements \PHPStan\Rules\Rule<\PhpParser\Node\Expr\MethodCall>
  */
@@ -41,7 +43,6 @@ class ModelPropertyRule implements Rule
 
     /**
      * @param  MethodCall  $node
-     * @param  Scope  $scope
      * @return string[]
      */
     public function processNode(Node $node, Scope $scope): array

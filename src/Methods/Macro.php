@@ -15,6 +15,8 @@ use PHPStan\Type\Generic\TemplateTypeMap;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 
+use function array_key_exists;
+
 final class Macro implements MethodReflection
 {
     /**
@@ -70,9 +72,6 @@ final class Macro implements MethodReflection
 
     /**
      * Set the is static value.
-     *
-     * @param  bool  $isStatic
-     * @return void
      */
     public function setIsStatic(bool $isStatic): void
     {
@@ -106,7 +105,7 @@ final class Macro implements MethodReflection
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getVariants(): array
     {

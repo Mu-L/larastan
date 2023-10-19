@@ -11,6 +11,8 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Collectors\Collector;
 use PHPStan\Type\ObjectType;
 
+use function count;
+
 /** @implements Collector<Node\Expr\StaticCall, string> */
 final class UsedViewFacadeMakeCollector implements Collector
 {
@@ -19,7 +21,7 @@ final class UsedViewFacadeMakeCollector implements Collector
         return Node\Expr\StaticCall::class;
     }
 
-    /** @param Node\Expr\StaticCall $node */
+    /** @param  Node\Expr\StaticCall  $node */
     public function processNode(Node $node, Scope $scope): ?string
     {
         $name = $node->name;

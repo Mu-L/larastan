@@ -19,6 +19,9 @@ use PHPStan\Type\Type;
 use PHPStan\Type\TypeTraverser;
 use PHPStan\Type\UnionType;
 
+use function array_map;
+use function in_array;
+
 class CollectionGenericStaticMethodDynamicStaticMethodReturnTypeExtension implements DynamicStaticMethodReturnTypeExtension
 {
     public function __construct(private ReflectionProvider $reflectionProvider)
@@ -41,7 +44,7 @@ class CollectionGenericStaticMethodDynamicStaticMethodReturnTypeExtension implem
         MethodReflection $methodReflection,
         StaticCall $methodCall,
         Scope $scope
-    ): \PHPStan\Type\Type {
+    ): Type {
         $returnType = ParametersAcceptorSelector::selectFromArgs(
             $scope,
             $methodCall->getArgs(),

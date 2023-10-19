@@ -9,6 +9,8 @@ use PHPStan\Type\CompoundType;
 use PHPStan\Type\StringType;
 use PHPStan\Type\Type;
 
+use function count;
+
 /**
  * The custom 'view-string' type class. It's a subset of the string type. Every string that passes the
  * view()->exists($string) test is a valid view-string type.
@@ -74,7 +76,6 @@ class ViewStringType extends StringType
 
     /**
      * @param  mixed[]  $properties
-     * @return Type
      */
     public static function __set_state(array $properties): Type
     {

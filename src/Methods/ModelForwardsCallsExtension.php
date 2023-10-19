@@ -27,7 +27,9 @@ use PHPStan\Type\Type;
 use PHPStan\Type\TypeTraverser;
 use PHPStan\Type\TypeWithClassName;
 
+use function array_key_exists;
 use function array_map;
+use function in_array;
 
 final class ModelForwardsCallsExtension implements MethodsClassReflectionExtension
 {
@@ -71,11 +73,6 @@ final class ModelForwardsCallsExtension implements MethodsClassReflectionExtensi
         return false;
     }
 
-    /**
-     * @param  ClassReflection  $classReflection
-     * @param  string  $methodName
-     * @return MethodReflection
-     */
     public function getMethod(ClassReflection $classReflection, string $methodName): MethodReflection
     {
         return $this->cache[$classReflection->getCacheKey().'-'.$methodName];
